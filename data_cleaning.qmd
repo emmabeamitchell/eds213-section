@@ -1,0 +1,41 @@
+---
+title: "data cleaning"
+format: html
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+library(here)
+library(janitor)
+```
+
+```{r}
+crop_products <- read_csv(here("data", "FAOSTAT_data_en_4-1-2025.csv")) 
+crop_calendar <- read_csv(here("data", "crop_yields.csv"))
+```
+
+
+clean data
+
+```{r}
+crop_prod_clean <- crop_products |> 
+  clean_names() |> 
+  rename(country = area) |> 
+  select(-domain, -note) 
+  
+
+crop_cal_clean <- crop_calendar |> 
+  clean_names() |> 
+  rename(country = location) |> 
+  select(-county_code, - state_code, -x)
+
+```
+
+
+```{r}
+class(crop_prod_clean$year)
+
+```
+
