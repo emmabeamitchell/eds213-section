@@ -1,41 +1,46 @@
 ---
 title: "data cleaning"
+author: "Emma Bea Mitchell"
 format: html
 editor_options: 
   chunk_output_type: console
 ---
 
 ```{r}
+# load libraries
 library(tidyverse)
 library(here)
 library(janitor)
 ```
 
 ```{r}
+# read in datasets
 crop_products <- read_csv(here("data", "FAOSTAT_data_en_4-1-2025.csv")) 
 crop_calendar <- read_csv(here("data", "crop_yields.csv"))
 ```
 
 
-clean data
+Clean the Data:
 
 ```{r}
+# clean crop_products data
 crop_prod_clean <- crop_products |> 
   clean_names() |> 
+  # make name consistent with other dataset
   rename(country = area) |> 
-  select(-domain, -note) 
+  # remove columns with no metadata/information and aren't needed for query
+  select(-domain, -note, - flag, - flag_description, - domain_code, -area_code_m49) |> 
+  # omit NAs for simplicity of working with data
+  na.omit()
   
-
+# clean crop_calendar data
 crop_cal_clean <- crop_calendar |> 
   clean_names() |> 
+  # make names consistent with other dataset
   rename(country = location) |> 
-  select(-county_code, - state_code, -x)
-
+  # remove columns with no metadata/information and aren't needed for query
+  select(-county_code, - state_code, -x, -notes, -x1, - source) |> 
+  # omit NAs for simplicity of working with data
+  na.omit()
+ 
 ```
-
-
-```{r}
-class(crop_prod_clean$year)
-
-```
-

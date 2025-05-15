@@ -1,4 +1,5 @@
 -- Section EDS 213 Database Creating
+-- Author: Emma Bea Mitchell
 
 -- Creating Tables
 
@@ -72,6 +73,7 @@ SELECT
     GROUP BY Country.country
     ORDER BY avg_yield DESC
     LIMIT 5;
+
 
 
 

@@ -2,3 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
+
+*.DS_Store
+database.db
+database.db.wal
+data.db
+data.db.wal

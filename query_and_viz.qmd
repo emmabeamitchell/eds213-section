@@ -1,0 +1,94 @@
+---
+title: "query and viz"
+author: "Emma Bea Mitchell"
+format: html
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+# load libraries
+library(tidyverse)
+library(duckdb)
+library(dbplyr)
+library(forcats)
+```
+
+```{r}
+# establish connection
+conn <- DBI::dbConnect(duckdb::duckdb(), dbdir='C:/meds/eds-213/eds213-section/data/data.db')
+```
+
+```{r}
+# connect to tables in database
+DBI::dbListTables(conn)
+Temperature <- tbl(conn, "Temperature")
+Precipitation <- tbl(conn, "Precipitation")
+Country <- tbl(conn, "Country")
+CropYields <- tbl(conn, "CropYields")
+Products <- tbl(conn, "Products")
+
+```
+
+Recreate the SQL query in R using dbplyr
+
+The query answers the questions: 
+
+What countries (excluding the US) have the largest yield of wheat, and how does the precipitation and temperature at the time of planting vary between the top 5 countries?
+
+```{r}
+# sql query with dbplyr
+TopYieldCountries <- Temperature |> 
+  inner_join(Precipitation, by = join_by(data_id)) |> 
+  inner_join(CropYields, by = join_by(data_id)) |> 
+  inner_join(Country, by = join_by(location_code)) |> 
+  inner_join(Products, by = c("country" = "country", "crop" = "item")) |> 
+  filter(crop == 'Wheat',
+         element == 'Yield') |> 
+  group_by(country) |> 
+  summarize(avg_temp_at_planting = mean(temp_at_planting),
+            avg_precip_at_planting = mean(precip_at_planting),
+            avg_yield = mean(value)) |> 
+  arrange(desc(avg_yield)) |> 
+  head(5) |> 
+  collect() |> 
+  mutate(country = factor(country, levels = country))  
+
+```
+
+
+```{r}
+# data visualization
+ggplot(data = TopYieldCountries, aes(x = country, y = avg_yield)) +
+  geom_col(fill = "navy") +
+  labs(
+    y = "Average Yield (kg/ha)",
+    x = "Country",
+    title = "Top Five Countries with Highest Wheat Yields"
+  ) +
+  theme_minimal()
+
+ggplot(data = TopYieldCountries, aes(x = country, y = avg_temp_at_planting)) +
+  geom_col(aes(fill = avg_yield)) +
+  labs(
+    y = "Average Temperature at Planting (C)",
+    x = "Country",
+    title = "Average Temperature at Planting for\n Countries with Highest Wheat Yields"
+  ) +
+  theme_minimal()
+
+ggplot(data = TopYieldCountries, aes(x = country, y = avg_precip_at_planting)) +
+  geom_col(aes(fill = avg_yield)) +
+    geom_col(aes(fill = avg_yield)) +
+  labs(
+    y = "Average Precipitation at Planting (C)",
+    x = "Country",
+    title = "Average Precipitation at Planting for\n Countries with Highest Wheat Yields"
+  ) +
+  theme_minimal()
+
+```
+
+
+```
+
