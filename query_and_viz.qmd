@@ -90,5 +90,5 @@ ggplot(data = TopYieldCountries, aes(x = country, y = avg_precip_at_planting)) +
 ```
 
 
-```
+
 
